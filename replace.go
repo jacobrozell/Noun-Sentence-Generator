@@ -85,25 +85,3 @@ func readLines(path string) ([]string, error) {
     return lines, scanner.Err()
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
