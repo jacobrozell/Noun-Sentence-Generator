@@ -8,55 +8,66 @@ import (
     "time"
     "strings"
     "log"
+    "errors"
 )
 
 func main() {
+Start:
     nouns := []string{}
     nouns, err := readLines("nounlist.txt")
     if err != nil {
         log.Fatalf("readLines", err)
     }
 
+    words := strings.Fields(getUserInput())
+    xIndex, yIndex, err := findIndices(words)
+    if err != nil {
+        fmt.Println("Please enter a valid response.")
+        goto Start
+    }
+    words[xIndex], words[yIndex] = generateRandomWords(nouns)
+    finalSentence := calcFinalSentence(words)
+
+    fmt.Println(finalSentence, "\n---------------------------------------------------------\n")
+}
+
+func getUserInput() string {
     fmt.Println("\n---------------------------------------------------------")
     fmt.Println("Type in a sentence with X (noun) and Y (noun).")
-    fmt.Println("For example:", "The X is in a Y", "The X is hitting Y")
+    fmt.Println("For example:", "'The X is in a Y'", "'The X is hitting Y'")
     reader := bufio.NewReader(os.Stdin)
     sentence, _ := reader.ReadString('\n')
+    return sentence
+}
 
-    rand.Seed(time.Now().Unix()) 
-    index1 := rand.Intn(len(nouns))
-    new1 := nouns[index1]
+func generateRandomWords(nouns []string) (string, string) {
+    rand.Seed(time.Now().Unix())
+    return nouns[rand.Intn(len(nouns))], nouns[rand.Intn(len(nouns))]
+}
 
-    index2 := rand.Intn(len(nouns))
-    new2 := nouns[index2]
-
-    words := strings.Fields(sentence)
-
-    xIndex, yIndex := findIndices(words)
-
-    words[xIndex] = new1
-    words[yIndex] = new2
-
+func calcFinalSentence(words []string) string {
     finalSentence := ""
     for _, word := range words {
         finalSentence += word + " "
     }
-
-    fmt.Println(finalSentence, "\n")
+    return finalSentence
 }
 
-func findIndices(words []string) (int, int) {
+func findIndices(words []string) (int, int, error) {
     indexX, indexY := -1, -1
-    //words := strings.Fields(sentence)
     for i, word := range words {
-        if word == "X" {
+        if word == "X" || word == "x" {
             indexX = i
         } 
-        if word == "Y" {
+        if word == "Y" || word == "y"{
             indexY = i
         }
     }
-    return indexX, indexY
+    if indexX == -1 || indexY == -1 {
+        return indexX, indexY, errors.New("Enter a valid input.")
+    } else {
+        return indexX, indexY, nil
+    }
 }
 
 func readLines(path string) ([]string, error) {
